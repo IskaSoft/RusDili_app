@@ -423,9 +423,18 @@ class MatchingState {
 class MatchingNotifier extends StateNotifier<MatchingState> {
   final ExerciseRepository _exerciseRepo;
   final ProgressRepository _progressRepo;
+  // DÜZEDIŞ #8: StateNotifier-de `mounted` ýatrymy ýok.
+  // Future.delayed içinde state ýazmadan öň dispose barlagy gerek.
+  bool _isDisposed = false;
 
   MatchingNotifier(this._exerciseRepo, this._progressRepo)
     : super(const MatchingState());
+
+  @override
+  void dispose() {
+    _isDisposed = true;
+    super.dispose();
+  }
 
   Future<void> loadMatching(int lessonId) async {
     final questions = await _exerciseRepo.getAllQuestionsForLesson(lessonId);
@@ -541,7 +550,10 @@ class MatchingNotifier extends StateNotifier<MatchingState> {
       );
     } else {
       Future.delayed(const Duration(milliseconds: 600), () {
-        if (mounted) {
+        // DÜZEDIŞ #8: `mounted` → `_isDisposed` — StateNotifier-de
+        // `mounted` ýok, dispose bolan notifier-de state ýazmak
+        // Flutter exception döredýärdi.
+        if (!_isDisposed) {
           state = state.copyWith(clearLeft: true, clearRight: true);
         }
       });

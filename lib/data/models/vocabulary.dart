@@ -1,4 +1,3 @@
-import 'dart:typed_data';
 import '../../core/constants/db_constants.dart';
 
 class Vocabulary {
@@ -9,7 +8,6 @@ class Vocabulary {
   final String? exampleRu;
   final String? exampleTk;
   final String? imagePath;
-  final Uint8List? imageBlob;
   final String? audioPath;
   final String? category;
   final int difficulty;
@@ -22,7 +20,6 @@ class Vocabulary {
     this.exampleRu,
     this.exampleTk,
     this.imagePath,
-    this.imageBlob,
     this.audioPath,
     this.category,
     this.difficulty = 1,
@@ -37,7 +34,6 @@ class Vocabulary {
       exampleRu: map[DbConstants.colExampleRu] as String?,
       exampleTk: map[DbConstants.colExampleTk] as String?,
       imagePath: map[DbConstants.colImagePath] as String?,
-      imageBlob: map[DbConstants.colImageBlob] as Uint8List?,
       audioPath: map[DbConstants.colAudioPath] as String?,
       category: map[DbConstants.colCategory] as String?,
       difficulty: map[DbConstants.colDifficulty] as int? ?? 1,
@@ -53,7 +49,6 @@ class Vocabulary {
       DbConstants.colExampleRu: exampleRu,
       DbConstants.colExampleTk: exampleTk,
       DbConstants.colImagePath: imagePath,
-      DbConstants.colImageBlob: imageBlob,
       DbConstants.colAudioPath: audioPath,
       DbConstants.colCategory: category,
       DbConstants.colDifficulty: difficulty,
@@ -68,7 +63,6 @@ class Vocabulary {
     String? exampleRu,
     String? exampleTk,
     String? imagePath,
-    Uint8List? imageBlob,
     String? audioPath,
     String? category,
     int? difficulty,
@@ -81,7 +75,6 @@ class Vocabulary {
       exampleRu: exampleRu ?? this.exampleRu,
       exampleTk: exampleTk ?? this.exampleTk,
       imagePath: imagePath ?? this.imagePath,
-      imageBlob: imageBlob ?? this.imageBlob,
       audioPath: audioPath ?? this.audioPath,
       category: category ?? this.category,
       difficulty: difficulty ?? this.difficulty,

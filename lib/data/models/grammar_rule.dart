@@ -1,4 +1,3 @@
-import 'dart:typed_data';
 import '../../core/constants/db_constants.dart';
 
 class GrammarRule {
@@ -11,7 +10,6 @@ class GrammarRule {
   final String? noteTk;
   final String ruleType;
   final String? imagePath;
-  final Uint8List? imageBlob;
   final int orderIndex;
   final List<GrammarTableRow> rows;
 
@@ -25,7 +23,6 @@ class GrammarRule {
     this.noteTk,
     this.ruleType = DbConstants.ruleTypeTable,
     this.imagePath,
-    this.imageBlob,
     this.orderIndex = 0,
     this.rows = const [],
   });
@@ -46,7 +43,6 @@ class GrammarRule {
       noteTk: map[DbConstants.colNote] as String?,
       ruleType: map[DbConstants.colRuleType] as String? ?? DbConstants.ruleTypeTable,
       imagePath: map[DbConstants.colImagePath] as String?,
-      imageBlob: map[DbConstants.colImageBlob] as Uint8List?,
       orderIndex: map[DbConstants.colOrderIndex] as int? ?? 0,
       rows: rows,
     );
@@ -63,7 +59,6 @@ class GrammarRule {
       noteTk: noteTk,
       ruleType: ruleType,
       imagePath: imagePath,
-      imageBlob: imageBlob,
       orderIndex: orderIndex,
       rows: rows ?? this.rows,
     );

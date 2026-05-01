@@ -22,12 +22,10 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final dialogAsync = ref.watch(
-      FutureProvider.family<DialogModel?, int>(
-        (ref, id) =>
-            ref.read(lessonRepositoryProvider).getDialogById(id),
-      )(widget.dialogId),
-    );
+    // DÜZEDIŞ #2: Öňki kod her build-da täze FutureProvider döredýärdi —
+    // Riverpod muny cache edip bilmeýärdi, her rebuild-da DB soragydy.
+    // Indi global dialogByIdProvider ulanylýar — cache dogry işleýär.
+    final dialogAsync = ref.watch(dialogByIdProvider(widget.dialogId));
 
     return dialogAsync.when(
       data: (dialog) {

@@ -242,22 +242,30 @@ class ProgressRepository {
 
     final allProgress = await _db.query(DbConstants.tUserProgress);
     final totalAnswered = allProgress.length;
-    final correctAnswers =
-        allProgress
-            .where((p) => (p[DbConstants.colIsCorrect] as int) == 1)
-            .length;
+    final correctAnswers = allProgress
+        .where((p) => (p[DbConstants.colIsCorrect] as int) == 1)
+        .length;
 
     final avgScore =
         totalAnswered > 0 ? (correctAnswers / totalAnswered) * 100 : 0.0;
 
+    // DÜZEDIŞ #5: 'totalLessons: 10' hardcoded däl — A2/B1 goşulanda
+    // ýalňyş görkezerdi. Indi DB-den dinamiki alynýar.
+    final lessonCountResult = await _db.rawQuery(
+      'SELECT COUNT(*) as cnt FROM ${DbConstants.tLessons}',
+    );
+    final totalLessons =
+        lessonCountResult.first['cnt'] as int? ?? 10;
+
     return {
       'completedLessons': completedLessons,
-      'totalLessons': 10,
+      'totalLessons': totalLessons,
       'totalVocabStudied': totalVocabStudied,
       'totalAnswered': totalAnswered,
       'correctAnswers': correctAnswers,
       'avgScore': avgScore,
-      'overallPercent': (completedLessons / 10) * 100,
+      'overallPercent':
+          totalLessons > 0 ? (completedLessons / totalLessons) * 100 : 0.0,
     };
   }
 

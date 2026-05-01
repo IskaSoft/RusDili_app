@@ -1,4 +1,3 @@
-import 'dart:typed_data';
 import '../../core/constants/db_constants.dart';
 
 class DialogModel {
@@ -8,7 +7,6 @@ class DialogModel {
   final String? dialogName;
   final String? contextTk;
   final String? imagePath;
-  final Uint8List? imageBlob;
   final List<DialogLine> lines;
 
   const DialogModel({
@@ -18,7 +16,6 @@ class DialogModel {
     this.dialogName,
     this.contextTk,
     this.imagePath,
-    this.imageBlob,
     this.lines = const [],
   });
 
@@ -31,7 +28,6 @@ class DialogModel {
       dialogName: map[DbConstants.colDialogName] as String?,
       contextTk: map[DbConstants.colContextTk] as String?,
       imagePath: map[DbConstants.colImagePath] as String?,
-      imageBlob: map[DbConstants.colImageBlob] as Uint8List?,
       lines: lines,
     );
   }
@@ -43,7 +39,6 @@ class DialogModel {
     String? dialogName,
     String? contextTk,
     String? imagePath,
-    Uint8List? imageBlob,
     List<DialogLine>? lines,
   }) {
     return DialogModel(
@@ -53,7 +48,6 @@ class DialogModel {
       dialogName: dialogName ?? this.dialogName,
       contextTk: contextTk ?? this.contextTk,
       imagePath: imagePath ?? this.imagePath,
-      imageBlob: imageBlob ?? this.imageBlob,
       lines: lines ?? this.lines,
     );
   }

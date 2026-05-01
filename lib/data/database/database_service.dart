@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart' as p;
 import '../../core/constants/db_constants.dart';
+import '../../core/utils/db_helper.dart';
 import 'database_seeder.dart';
 
 class DatabaseService {
@@ -44,34 +45,28 @@ class DatabaseService {
     await _safePragma(db, 'PRAGMA foreign_keys = ON');
   }
 
-  /// Safely execute PRAGMA using rawQuery (handles platform differences)
+  /// Safely execute PRAGMA — hemişe doly PRAGMA SQL ulanylýar.
+  /// DÜZEDIŞ #1: Öňki kod 'PRAGMA ' sözüni aýryp nädogry SQL döredýärdi:
+  ///   execute('journal_mode = WAL') → SQLite düşünenok, hiç iş etmeýärdi!
+  /// Dogry: execute('PRAGMA journal_mode = WAL')
   Future<void> _safePragma(Database db, String pragmaSql) async {
     try {
-      // PRAGMAs that return values use rawQuery
-      if (pragmaSql.contains('= WAL') ||
-          pragmaSql.contains('= MEMORY') ||
-          pragmaSql.contains('= NORMAL') ||
-          pragmaSql.contains('= OFF')) {
-        // These are SET operations - use execute, not query
-        await db.execute(pragmaSql.replaceFirst('PRAGMA ', ''));
-      } else {
-        await db.rawQuery(pragmaSql);
-      }
+      await db.execute(pragmaSql);
     } catch (e) {
-      // Silently ignore PRAGMA errors on platforms that don't support them
-      // (e.g., some Android emulators, iOS simulators)
       debugPrint('PRAGMA warning (non-critical): $pragmaSql -> $e');
     }
   }
 
   Future<void> _onCreate(Database db, int version) async {
-    // Create all tables
+    // Create all tables + indexes
     for (final sql in DbConstants.allCreateStatements) {
       await db.execute(sql);
     }
-
-    // Seed initial data
+    // Seed initial lesson/exercise/dialog data
     await DatabaseSeeder.seed(db);
+    // DÜZEDIŞ #7: seedAllImages() _onCreate-da çagyrylmaýardy —
+    // DbHelper.getImageBlob() hemişe null gaýtarýardy.
+    await DbHelper.seedAllImages();
   }
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {

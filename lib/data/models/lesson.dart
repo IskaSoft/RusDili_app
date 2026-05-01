@@ -1,4 +1,3 @@
-import 'dart:typed_data';
 import '../../core/constants/db_constants.dart';
 
 class Lesson {
@@ -9,7 +8,6 @@ class Lesson {
   final String? subtitleTk;
   final String? descriptionTk;
   final String? imagePath;
-  final Uint8List? imageBlob;
   final bool isCompleted;
   final int orderIndex;
   final String? createdAt;
@@ -22,7 +20,6 @@ class Lesson {
     this.subtitleTk,
     this.descriptionTk,
     this.imagePath,
-    this.imageBlob,
     this.isCompleted = false,
     this.orderIndex = 0,
     this.createdAt,
@@ -37,7 +34,6 @@ class Lesson {
       subtitleTk: map[DbConstants.colSubtitleTk] as String?,
       descriptionTk: map[DbConstants.colDescriptionTk] as String?,
       imagePath: map[DbConstants.colImagePath] as String?,
-      imageBlob: map[DbConstants.colImageBlob] as Uint8List?,
       isCompleted: (map[DbConstants.colIsCompleted] as int? ?? 0) == 1,
       orderIndex: map[DbConstants.colOrderIndex] as int? ?? 0,
       createdAt: map[DbConstants.colCreatedAt] as String?,
@@ -53,7 +49,6 @@ class Lesson {
       DbConstants.colSubtitleTk: subtitleTk,
       DbConstants.colDescriptionTk: descriptionTk,
       DbConstants.colImagePath: imagePath,
-      DbConstants.colImageBlob: imageBlob,
       DbConstants.colIsCompleted: isCompleted ? 1 : 0,
       DbConstants.colOrderIndex: orderIndex,
       DbConstants.colCreatedAt: createdAt,
@@ -68,7 +63,6 @@ class Lesson {
     String? subtitleTk,
     String? descriptionTk,
     String? imagePath,
-    Uint8List? imageBlob,
     bool? isCompleted,
     int? orderIndex,
     String? createdAt,
@@ -81,7 +75,6 @@ class Lesson {
       subtitleTk: subtitleTk ?? this.subtitleTk,
       descriptionTk: descriptionTk ?? this.descriptionTk,
       imagePath: imagePath ?? this.imagePath,
-      imageBlob: imageBlob ?? this.imageBlob,
       isCompleted: isCompleted ?? this.isCompleted,
       orderIndex: orderIndex ?? this.orderIndex,
       createdAt: createdAt ?? this.createdAt,

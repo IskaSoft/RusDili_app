@@ -1,4 +1,3 @@
-import 'dart:typed_data';
 import '../../core/constants/db_constants.dart';
 
 class ReadingText {
@@ -7,7 +6,6 @@ class ReadingText {
   final String? titleRu;
   final String contentRu;
   final String? imagePath;
-  final Uint8List? imageBlob;
 
   const ReadingText({
     required this.id,
@@ -15,7 +13,6 @@ class ReadingText {
     this.titleRu,
     required this.contentRu,
     this.imagePath,
-    this.imageBlob,
   });
 
   factory ReadingText.fromMap(Map<String, dynamic> map) {
@@ -25,7 +22,6 @@ class ReadingText {
       titleRu: map[DbConstants.colTitleRu] as String?,
       contentRu: map[DbConstants.colTextRu] as String? ?? map['content_ru'] as String,
       imagePath: map[DbConstants.colImagePath] as String?,
-      imageBlob: map[DbConstants.colImageBlob] as Uint8List?,
     );
   }
 

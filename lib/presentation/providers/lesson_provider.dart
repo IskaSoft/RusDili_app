@@ -17,56 +17,67 @@ final databaseServiceProvider = Provider<DatabaseService>((ref) {
 });
 
 final lessonRepositoryProvider = Provider<LessonRepository>((ref) {
-  return LessonRepository(ref.read(databaseServiceProvider));
+  // DÜZEDIŞ #6: ref.watch ulanylýar — dependency tracking dogry işleýär
+  return LessonRepository(ref.watch(databaseServiceProvider));
 });
 
 final exerciseRepositoryProvider = Provider<ExerciseRepository>((ref) {
-  return ExerciseRepository(ref.read(databaseServiceProvider));
+  return ExerciseRepository(ref.watch(databaseServiceProvider));
 });
 
 final progressRepositoryProvider = Provider<ProgressRepository>((ref) {
-  return ProgressRepository(ref.read(databaseServiceProvider));
+  return ProgressRepository(ref.watch(databaseServiceProvider));
 });
 
 // ── Lesson Providers ─────────────────────────────────────────
 
 final allLessonsProvider = FutureProvider<List<Lesson>>((ref) async {
-  final repo = ref.read(lessonRepositoryProvider);
+  // DÜZEDIŞ #6: ref.read → ref.watch (FutureProvider içinde)
+  final repo = ref.watch(lessonRepositoryProvider);
   return repo.getAllLessons();
 });
 
 final lessonByIdProvider =
     FutureProvider.family<Lesson?, int>((ref, lessonId) async {
-  final repo = ref.read(lessonRepositoryProvider);
+  final repo = ref.watch(lessonRepositoryProvider);
   return repo.getLessonById(lessonId);
 });
 
 final vocabularyForLessonProvider =
     FutureProvider.family<List<Vocabulary>, int>((ref, lessonId) async {
-  final repo = ref.read(lessonRepositoryProvider);
+  final repo = ref.watch(lessonRepositoryProvider);
   return repo.getVocabularyForLesson(lessonId);
 });
 
 final dialogsForLessonProvider =
     FutureProvider.family<List<DialogModel>, int>((ref, lessonId) async {
-  final repo = ref.read(lessonRepositoryProvider);
+  final repo = ref.watch(lessonRepositoryProvider);
   return repo.getDialogsForLesson(lessonId);
 });
 
+// DÜZEDIŞ #2: ConversationScreen inline FutureProvider döretmäge derek
+// bu ýerde aýratyn global provider — cache dogry işleýär, her build-da
+// täze provider döretmeýär.
+final dialogByIdProvider =
+    FutureProvider.family<DialogModel?, int>((ref, dialogId) async {
+  final repo = ref.watch(lessonRepositoryProvider);
+  return repo.getDialogById(dialogId);
+});
+
 final allDialogsProvider = FutureProvider<List<DialogModel>>((ref) async {
-  final repo = ref.read(lessonRepositoryProvider);
+  final repo = ref.watch(lessonRepositoryProvider);
   return repo.getAllDialogs();
 });
 
 final grammarRulesForLessonProvider =
     FutureProvider.family<List<GrammarRule>, int>((ref, lessonId) async {
-  final repo = ref.read(exerciseRepositoryProvider);
+  final repo = ref.watch(exerciseRepositoryProvider);
   return repo.getGrammarRulesForLesson(lessonId);
 });
 
 final readingTextForLessonProvider =
     FutureProvider.family<ReadingText?, int>((ref, lessonId) async {
-  final repo = ref.read(lessonRepositoryProvider);
+  final repo = ref.watch(lessonRepositoryProvider);
   return repo.getReadingTextForLesson(lessonId);
 });
 
@@ -74,19 +85,19 @@ final readingTextForLessonProvider =
 
 final allLessonProgressProvider =
     FutureProvider<List<LessonProgress>>((ref) async {
-  final repo = ref.read(progressRepositoryProvider);
+  final repo = ref.watch(progressRepositoryProvider);
   return repo.getAllLessonProgress();
 });
 
 final lessonProgressProvider =
     FutureProvider.family<LessonProgress?, int>((ref, lessonId) async {
-  final repo = ref.read(progressRepositoryProvider);
+  final repo = ref.watch(progressRepositoryProvider);
   return repo.getLessonProgress(lessonId);
 });
 
 final overallStatsProvider =
     FutureProvider<Map<String, dynamic>>((ref) async {
-  final repo = ref.read(progressRepositoryProvider);
+  final repo = ref.watch(progressRepositoryProvider);
   return repo.getOverallStats();
 });
 
@@ -201,9 +212,9 @@ final lessonDetailProvider =
     StateNotifierProvider.family<LessonDetailNotifier, LessonDetailState, int>(
   (ref, lessonId) {
     final notifier = LessonDetailNotifier(
-      ref.read(lessonRepositoryProvider),
-      ref.read(exerciseRepositoryProvider),
-      ref.read(progressRepositoryProvider),
+      ref.watch(lessonRepositoryProvider),
+      ref.watch(exerciseRepositoryProvider),
+      ref.watch(progressRepositoryProvider),
     );
     notifier.loadLesson(lessonId);
     return notifier;
