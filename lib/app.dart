@@ -15,6 +15,8 @@ import 'presentation/screens/conversation/conversation_list_screen.dart';
 import 'presentation/screens/conversation/conversation_screen.dart';
 import 'presentation/screens/grammar/grammar_list_screen.dart';
 import 'presentation/screens/grammar/grammar_detail_screen.dart';
+import 'presentation/screens/library/library_screen.dart';
+import 'presentation/screens/level/level_select_screen.dart';
 
 final _router = GoRouter(
   initialLocation: '/splash',
@@ -80,6 +82,14 @@ final _router = GoRouter(
     GoRoute(
       path: '/grammar',
       builder: (_, __) => const GrammarListScreen(),
+    ),
+    GoRoute(
+      path: '/level-select',
+      builder: (_, __) => const LevelSelectScreen(),
+    ),
+    GoRoute(
+      path: '/library',
+      builder: (_, __) => const LibraryScreen(),
     ),
     GoRoute(
       path: '/grammar/:lessonId',

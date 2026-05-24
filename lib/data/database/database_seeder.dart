@@ -1,7 +1,7 @@
 import 'package:sqflite/sqflite.dart';
 import '../../core/constants/db_constants.dart';
 
-/// Seeds the database with all lesson data from the A1 Russian textbook
+/// A1 Kurs kitaby — sapaklar, sözler, dialoglar, grammatika, gönükmeler.
 class DatabaseSeeder {
   static Future<void> seed(Database db) async {
     await _seedLessons(db);

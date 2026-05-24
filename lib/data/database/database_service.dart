@@ -4,6 +4,10 @@ import 'package:path/path.dart' as p;
 import '../../core/constants/db_constants.dart';
 import '../../core/utils/db_helper.dart';
 import 'database_seeder.dart';
+import 'database_seeder_a2.dart';
+import 'database_seeder_b1.dart';
+import 'database_seeder_library.dart';
+import 'database_seeder_core_vocab.dart';
 
 class DatabaseService {
   DatabaseService._internal();
@@ -17,7 +21,13 @@ class DatabaseService {
   }
 
   Future<void> init() async {
-    await database;
+    try {
+      await database;
+    } catch (e, st) {
+      debugPrint('DB init failed, recreating database: $e\n$st');
+      await _recreateDatabase();
+      await database;
+    }
   }
 
   Future<Database> _initDatabase() async {
@@ -36,8 +46,8 @@ class DatabaseService {
   // REMOVED: _onConfigure - PRAGMAs moved to _onOpen
 
   Future<void> _onOpen(Database db) async {
+    await _ensureSchema(db);
     // Apply PRAGMA settings AFTER database is fully opened
-    // Use rawQuery for PRAGMAs to avoid SqfliteDatabaseException
     await _safePragma(db, 'PRAGMA journal_mode = WAL');
     await _safePragma(db, 'PRAGMA cache_size = -8000');
     await _safePragma(db, 'PRAGMA synchronous = NORMAL');
@@ -58,21 +68,87 @@ class DatabaseService {
   }
 
   Future<void> _onCreate(Database db, int version) async {
-    // Create all tables + indexes
     for (final sql in DbConstants.allCreateStatements) {
       await db.execute(sql);
     }
-    // Seed initial lesson/exercise/dialog data
-    await DatabaseSeeder.seed(db);
-    // DÜZEDIŞ #7: seedAllImages() _onCreate-da çagyrylmaýardy —
-    // DbHelper.getImageBlob() hemişe null gaýtarýardy.
+    await DatabaseSeeder.seed(db);           // A1 Kurs kitaby (Sapak 01–10)
+    await DatabaseSeederA2.seed(db);         // A2 Sapak 11–20
+    await DatabaseSeederB1.seed(db);         // B1 УРОК 21–28
+    await DatabaseSeederLibrary.seed(db);    // Kitaphana
+    await DatabaseSeederCoreVocab.seed(db);  // Işlikler, frazalar, baglaýjylar
     await DbHelper.seedAllImages();
   }
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
-    if (oldVersion < 2) {
-      // Migration to version 2 (future)
+    // Schema first — seeders use category / is_standalone columns.
+    await _ensureSchema(db);
+
+    if (oldVersion < 3) {
+      await DatabaseSeederA2.seed(db);
     }
+    if (oldVersion < 4) {
+      await DatabaseSeederLibrary.seed(db);
+    }
+    if (oldVersion < 5) {
+      await DatabaseSeederA2.seed(db);
+    }
+    if (oldVersion < 6) {
+      await DatabaseSeederCoreVocab.seed(db);
+    }
+    if (oldVersion < 7) {
+      await DatabaseSeederB1.seed(db);
+    }
+  }
+
+  /// Adds columns/tables missing from older DB files (also runs before seeding).
+  Future<void> _ensureSchema(Database db) async {
+    await _addColumnIfMissing(
+      db,
+      DbConstants.tDialogs,
+      DbConstants.colCategory,
+      "TEXT DEFAULT 'lesson'",
+    );
+    await _addColumnIfMissing(
+      db,
+      DbConstants.tExercises,
+      'is_standalone',
+      'INTEGER DEFAULT 0',
+    );
+    await db.execute(DbConstants.createFavoritesTable);
+    for (final sql in [
+      'CREATE INDEX IF NOT EXISTS idx_favorites ON favorites(item_type, item_id)',
+      'CREATE INDEX IF NOT EXISTS idx_dialogs_category ON dialogs(category)',
+      'CREATE INDEX IF NOT EXISTS idx_vocab_category ON vocabulary(category)',
+      'CREATE INDEX IF NOT EXISTS idx_exercises_standalone ON exercises(is_standalone)',
+    ]) {
+      try {
+        await db.execute(sql);
+      } catch (e) {
+        debugPrint('Index warning (non-critical): $sql -> $e');
+      }
+    }
+  }
+
+  Future<bool> _columnExists(Database db, String table, String column) async {
+    final rows = await db.rawQuery('PRAGMA table_info($table)');
+    return rows.any((r) => r['name'] == column);
+  }
+
+  Future<void> _addColumnIfMissing(
+    Database db,
+    String table,
+    String column,
+    String definition,
+  ) async {
+    if (await _columnExists(db, table, column)) return;
+    await db.execute('ALTER TABLE $table ADD COLUMN $column $definition');
+  }
+
+  Future<void> _recreateDatabase() async {
+    await close();
+    final dbPath = await getDatabasesPath();
+    final path = p.join(dbPath, DbConstants.dbName);
+    await deleteDatabase(path);
   }
 
   // ── Generic CRUD ────────────────────────────────────────

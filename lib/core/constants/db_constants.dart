@@ -3,7 +3,7 @@ class DbConstants {
 
   // Database
   static const String dbName = 'rus_dili.db';
-  static const int dbVersion = 1;
+  static const int dbVersion = 7;
 
   // Table names
   static const String tLessons = 'lessons';
@@ -151,11 +151,12 @@ class DbConstants {
   static const String createDialogsTable = '''
     CREATE TABLE IF NOT EXISTS dialogs (
       id              INTEGER PRIMARY KEY AUTOINCREMENT,
-      lesson_id       INTEGER NOT NULL,
+      lesson_id       INTEGER,
       dialog_number   INTEGER,
       dialog_name     TEXT,
       context_tk      TEXT,
       image_path      TEXT,
+      category        TEXT DEFAULT 'lesson',
       FOREIGN KEY (lesson_id) REFERENCES lessons(id)
     )
   ''';
@@ -209,13 +210,14 @@ class DbConstants {
   static const String createExercisesTable = '''
     CREATE TABLE IF NOT EXISTS exercises (
       id              INTEGER PRIMARY KEY AUTOINCREMENT,
-      lesson_id       INTEGER NOT NULL,
+      lesson_id       INTEGER,
       exercise_number INTEGER,
       title_tk        TEXT,
       instruction_tk  TEXT,
       exercise_type   TEXT NOT NULL,
       note_tk         TEXT,
       order_index     INTEGER,
+      is_standalone   INTEGER DEFAULT 0,
       FOREIGN KEY (lesson_id) REFERENCES lessons(id)
     )
   ''';
@@ -317,6 +319,42 @@ class DbConstants {
   static const String createIndexReadingTexts =
       'CREATE INDEX IF NOT EXISTS idx_reading_texts ON reading_texts(lesson_id)';
 
+  static const String tFavorites = 'favorites';
+
+  // Dialog kategoriýalary
+  static const String dialogCategoryLesson      = 'lesson';
+  static const String dialogCategoryPhrase      = 'phrase';
+  static const String dialogCategorySituational = 'situational';
+
+  // Vocabulary kategoriýalary (kitaphana üçin)
+  static const String vocabCategoryTopWords   = 'top_words';
+  static const String vocabCategoryPhrases    = 'phrases';
+  static const String vocabCategoryTopVerbs   = 'top_verbs';
+  static const String vocabCategoryTopPhrases = 'top_phrases';
+  static const String vocabCategoryConnectors = 'connectors';
+
+  // Favorites item görnüşleri
+  static const String favTypeWord     = 'word';
+  static const String favTypePhrase   = 'phrase';
+  static const String favTypeDialog   = 'dialog';
+  static const String favTypeExercise = 'exercise';
+
+  static const String createFavoritesTable = '''
+    CREATE TABLE IF NOT EXISTS favorites (
+      id          INTEGER PRIMARY KEY AUTOINCREMENT,
+      item_type   TEXT NOT NULL,
+      item_id     INTEGER NOT NULL,
+      added_at    TEXT,
+      UNIQUE(item_type, item_id)
+    )
+  ''';
+
+  // Migration SQL-leri (dbVersion 4 → _onUpgrade içinde)
+  static const String migrationAddDialogCategory =
+      "ALTER TABLE dialogs ADD COLUMN category TEXT DEFAULT 'lesson'";
+  static const String migrationAddExerciseStandalone =
+      'ALTER TABLE exercises ADD COLUMN is_standalone INTEGER DEFAULT 0';
+
   // All create statements in order
   static const List<String> allCreateStatements = [
     createLessonsTable,
@@ -332,7 +370,8 @@ class DbConstants {
     createLessonProgressTable,
     createReadingTextsTable,
     createAppImagesTable,
-    // Indexes — tablalardan soň döredilmeli
+    createFavoritesTable,
+    // Indexes
     createIndexVocabLesson,
     createIndexDialogsLesson,
     createIndexDialogLines,
@@ -343,5 +382,9 @@ class DbConstants {
     createIndexExerciseOptions,
     createIndexLessonProgress,
     createIndexReadingTexts,
+    'CREATE INDEX IF NOT EXISTS idx_favorites ON favorites(item_type, item_id)',
+    'CREATE INDEX IF NOT EXISTS idx_dialogs_category ON dialogs(category)',
+    'CREATE INDEX IF NOT EXISTS idx_vocab_category ON vocabulary(category)',
+    'CREATE INDEX IF NOT EXISTS idx_exercises_standalone ON exercises(is_standalone)',
   ];
 }

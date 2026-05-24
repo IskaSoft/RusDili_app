@@ -1,7 +1,6 @@
 import '../database/database_service.dart';
 import '../models/exercise.dart';
 import '../models/grammar_rule.dart';
-import '../../core/constants/db_constants.dart';
 
 class ExerciseRepository {
   final DatabaseService _db;
@@ -154,7 +153,12 @@ class ExerciseRepository {
     return _groupGrammarRows(rows);
   }
 
-  // ── Private grouping helpers ─────────────────────────────
+  // Public wrapper — library_provider standalone exercises üçin çagyrýar
+  List<Exercise> groupExerciseRowsPublic(
+    List<Map<String, dynamic>> exRows,
+    List<Map<String, dynamic>> optRows,
+  ) =>
+      _groupExerciseRows(exRows, optRows);
 
   List<Exercise> _groupExerciseRows(
     List<Map<String, dynamic>> exRows,

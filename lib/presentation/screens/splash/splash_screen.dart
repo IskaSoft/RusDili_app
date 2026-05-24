@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../providers/level_provider.dart';
 
-class SplashScreen extends StatefulWidget {
+class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
 
   @override
-  State<SplashScreen> createState() => _SplashScreenState();
+  ConsumerState<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> {
+class _SplashScreenState extends ConsumerState<SplashScreen> {
   @override
   void initState() {
     super.initState();
@@ -19,7 +21,31 @@ class _SplashScreenState extends State<SplashScreen> {
 
   Future<void> _navigate() async {
     await Future.delayed(const Duration(milliseconds: 2200));
-    if (mounted) context.go('/home');
+    if (!mounted) return;
+
+    // LevelProvider-dan ýüklenişi garaşmak —
+    // SharedPreferences async bolany üçin bir gezek barlaýarys
+    final levelState = ref.read(levelProvider);
+
+    if (levelState.isLoaded) {
+      _goNext(levelState);
+    } else {
+      // Henüz ýüklenmese, ýüklenýänçä garaşamaly däl —
+      // listener bilen yzarlaýarys
+      ref.listenManual(levelProvider, (_, next) {
+        if (next.isLoaded && mounted) {
+          _goNext(next);
+        }
+      });
+    }
+  }
+
+  void _goNext(LevelState state) {
+    if (state.hasSelected) {
+      context.go('/home');        // Öňden saýlanan — göni home
+    } else {
+      context.go('/level-select'); // Ilkinji gezek — dereje saýla
+    }
   }
 
   @override
